@@ -1,0 +1,74 @@
+---
+title: "Urban Lines"
+description: |
+  Green and Ecological Corridors: Strategic Development for Cities
+author:
+  - name: Migliari, W. (2020). 
+    affiliation_url: https://github.com/wemigliari
+date: "`r Sys.Date()`"
+output: radix::radix_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+
+library(knitr)
+library(dplyr)
+library(radix)
+
+```
+
+
+## Urban Lines
+\
+We have chosen a topic very well-known in the urban debate, but not well-explored. The urban lines are important for cities and urban tissues. They conceive the traces of what urban planners have done or not done yet. Nevertheless, they can be very handy if you imagine them as lines that tend to be obsolete in fifty years. Sustainability has to do with more restriction for cargo and movement of people. In the end of this section, we will explore better this affirmation, but for now it is indispensable to see how cities carved historically their ways. If they can be greener landscapes and based on what functions, for example, transport, public places, parks or "grandes manzanas" as in Barcelona. 
+
+* The expression of "grandes manzanas" refers to those blocks of a city zone in which the circulation of motorised vehicles is restrict. The decision is usually taken by local administrations such as the example of Barcelona City, London City and many others.
+\
+
+```{r label, echo = FALSE, out.width = "50%", fig.cap = "Oslo", out.extra='style="float:right; padding:12px"'}
+
+knitr::include_graphics("/Users/wemigliari/Documents/R/R_Scripts/Rmarkdown/map/oslo.png")
+
+```
+The black lines we see on the map indicates all the paths that exist in the city of Oslo. Not only do they indicate streets, roads and highways, but also natural paths as tracks through parks, navigation routes for costal waters among other possibilities. If these lines have a considerable percentage of green landscape capturing effectively ${CO_2}$ and promoting the interconnection of economies, that is to say, local, regional, national and international economies, they can be defined by green corridors. Green corridors are linked to movement of cargo in the Nordic glossary for sustainable cities. We add herein another concept or the ecological urban corridor which is the combination of minimum movement of people and cargo as possible.
+\
+\
+
+```{r, echo = FALSE, out.width = "50%", fig.cap = "Stockholm", out.extra='style="float:right; padding:12px"'}
+
+knitr::include_graphics("/Users/wemigliari/Documents/R/R_Scripts/Rmarkdown/map/stockholm.png")
+
+```
+The black lines we see on the map indicates all the paths that exist in the city of Stockholm Not only do they indicate streets, roads and highways, but also natural paths as tracks through parks, navigation routes for costal waters among other possibilities. If these lines have a considerable percentage of green landscape capturing effectively ${CO_2}$ and promoting the interconnection of economies, that is to say, local, regional, national and international economies, they can be defined by green corridors. Green corridors are linked to movement of cargo in the Nordic glossary for sustainable cities. We add herein another concept or the ecological urban corridor which is the combination of minimum movement of people and cargo as possible.
+\
+\
+
+```{r, echo = FALSE, out.width = "50%", fig.cap = "Copenhagen", out.extra='style="float:right; padding:12px"'}
+knitr::include_graphics("/Users/wemigliari/Documents/R/R_Scripts/Rmarkdown/map/copenhagen.png")
+
+```
+The black lines we see on the map indicates all the paths that exist in the city of Copenhagen. Not only do they indicate streets, roads and highways, but also natural paths as tracks through parks, navigation routes for costal waters among other possibilities. If these lines have a considerable percentage of green landscape capturing effectively ${CO_2}$ and promoting the interconnection of economies, that is to say, local, regional, national and international economies, they can be defined by green corridors. Green corridors are linked to movement of cargo in the Nordic glossary for sustainable cities. We add herein another concept or the ecological urban corridor which is the combination of minimum movement of people and cargo as possible.
+\
+\
+
+```{r, echo = FALSE, out.width = "50%", fig.cap = "Helsinki", out.extra='style="float:right; padding:12px"'}
+knitr::include_graphics("/Users/wemigliari/Documents/R/R_Scripts/Rmarkdown/map/helsinki.png")
+
+```
+The black lines we see on the map indicates all the paths that exist in the city of Helsinki Not only do they indicate streets, roads and highways, but also natural paths as tracks through parks, navigation routes for costal waters among other possibilities. If these lines have a considerable percentage of green landscape capturing effectively ${CO_2}$ and promoting the interconnection of economies, that is to say, local, regional, national and international economies, they can be defined by green corridors. Green corridors are linked to movement of cargo in the Nordic glossary for sustainable cities. We add herein another concept or the ecological urban corridor which is the combination of minimum movement of people and cargo as possible.
+\
+\
+
+
+
+
+Radix is a publication format for scientific and technical writing, native to the web. 
+
+Learn more about using Radix at <https://rstudio.github.io/radix>.
+
+
+
+
+
