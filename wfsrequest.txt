@@ -1,0 +1,1 @@
+http://www.geoservicos.ibge.gov.br:80/geoserver/wms?service=WFS&version=1.0.0&request=GetFeature&typeName=CGEO:AglomeradosSubnormais2010_Limites&outputFormat=SHAPE-ZIP
