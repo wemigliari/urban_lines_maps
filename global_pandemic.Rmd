@@ -1,0 +1,387 @@
+---
+title: "COVID-19 and Ecological Rights"
+author: "Migliari, W. (2020)."
+output:
+  rmarkdown::html_document:
+    theme: lumen
+bibliography: testcf.bib
+---
+\
+\
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=9, fig.height=4.5, fig.align = "center")
+
+library(readxl)
+library(leaflet)
+library(leaflet.extras)
+library(sp)
+library(plotly)
+library(DT)
+
+library(maps)
+library(mapdata)
+library(mapproj)
+
+library(dplyr)
+library(readxl)
+library(tidyverse)
+
+## Total Deaths per Region
+
+corona_region_sweden <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", 
+                                   sheet = "total_death_region")
+corona_region_sweden2 <- as.data.frame(corona_region_sweden)
+
+region_2018 <-corona_region_sweden2 %>% filter(Year == 2018)
+
+region_2019 <-corona_region_sweden2 %>% filter(Year == 2019)
+
+region_2020 <- corona_region_sweden2%>% filter(Year == 2020)
+
+total_2018 <- region_2018%>%filter(date == "Total")
+total_2019 <- region_2019%>%filter(date == "Total")
+total_2020 <- region_2020%>%filter(date == "Total")
+
+total_corona <- rbind(total_2018, total_2019, total_2020)
+total_corona2 <- t(total_corona)
+total_corona2 <- as.data.frame(total_corona2)
+test <- total_corona2[-c(1),]
+
+test2 <- set_names(test, nm = test[1, ])
+test2 <- slice(test2, -1)
+
+test3 <-tibble::rownames_to_column(test2, "NAME_1") 
+
+library(curl)
+library(rsconnect)
+library(leaflet)
+library(leaflet.extras)
+library(sp)
+library(plotly)
+library(maps)
+library(mapdata)
+library(mapproj)
+library(leaflet)
+library(sf)
+library(tmap)
+library(transformr)
+library(geojson)
+library(rgdal)
+library(raster) # union function
+library(bookdown)
+data("World")
+
+sweden <- readOGR("/Users/wemigliari/Documents/R/data/SWE_adm1.shp")
+class(sweden)
+
+sweden1 <- read_sf("/Users/wemigliari/Documents/R/data/SWE_adm1.shp")
+class(sweden1)
+
+sweden_test <- merge(test3, sweden1, by = "NAME_1") ## It works!
+class(sweden_test)
+
+sweden_test1 <- st_as_sf(sweden_test) ## It works!
+class(sweden_test1)
+
+### Labels
+
+regions <- paste(sep = "  ",
+                 sweden_test$NAME_1,
+                 "2018 -",
+                 sweden_test$`2018`,
+                 "|",
+                 "2019 -",
+                 sweden_test$`2019`,
+                 "|",
+                 "2020 -",
+                 sweden_test$`2020`)
+
+
+```
+
+\
+
+### Swedish Statistics on Mortality Rate
+
+## {.tabset}
+### Introduction
+
+\
+The Swedish Institute of Statistics (Statistik centralbyrån) has published the preliminary data on mortality rate in Sweden. The historical series cover the numbers of deaths during the last five years plus the year of 2020. The Swedish government makes the data public with the intention of informing the domestic society as well as the Nordic region about the consequences brought by the COVID-19 outbreak in the country. To read the complete documentation and download the data, <a href="https://www.scb.se/en/About-us/news-and-press-releases/statistics-sweden-to-publish-preliminary-statistics-on-deaths-in-sweden/" target="_blank"> click here.</a>
+
+\
+This page was built with the purpose of supporting the study of how the Swedish government has dealt with the COVID-19 outbreak. We included two sections with many charts, two tables and a map of Sweden divided into regions. All the material is interactive and we kindly recommend the visitors to explore the buttons and move the cursor over the images. This documentation includes a basic bibliograhy that will be constantly updated. Academic studies, official reports, newspapers and statistics are part of our sources. 
+
+\
+It is also important to highlight that the use of the content herein is under the umbrella of the Global Pandemic Network, COVID-19 - Cities and Human Rights. The group is coordinated by Dr. Ronald Car, Associate Professor, University of Macerata, and by the PhD Candidate Maria Antonia Tigre, Pace University, Regional Director, Lat. Am. Global Network for the Study of Human Rights and the Environment. My name is Wellington Migliari, PhD in Law and Political Science, member of the Institut de Recerca TransJus, University of Barcelona, Spain. My main areas of research and publications can be seen <a href="https://orcid.org/0000-0002-1073-1312" target="_blank"> here.</a>
+
+\
+
+```{r pressure, echo=FALSE, out.width = '100%'}
+knitr::include_graphics("global.png")
+```
+
+\
+\
+\
+
+
+### Mortality Rate
+
+\
+
+The Statistik centralbyrån (SCB) published the data on mortality rate in different fashions. This section only includes the number of deaths in total numbers and the average for the cross-section 2015-2019. The SCB has only included preliminary results for 2020. 
+
+\
+
+```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
+
+
+corona_sweden <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death")
+
+corona1 <- as.data.frame(corona_sweden)
+
+library(RColorBrewer)
+
+set.seed(50)
+
+plot_ly(corona1, x = corona1$Month...1, y = corona1$`2015`, 
+        name = "2015", type = "scatter", mode = "markers", color = I("steelblue"), marker = list(size = ~`2015`/60, opacity = 0.5))%>%
+  add_trace(x = corona1$Month...3, y = corona1$`2016`, color = I("steelblue"), name = "2016")%>%
+  add_trace(x = corona1$Month...5, y = corona1$`2017`, color = I("steelblue"), name = "2017")%>%
+  add_trace(x = corona1$Month...7, y = corona1$`2018`, color = I("steelblue"), name = "2018")%>%
+  add_trace(x = corona1$Month...9, y = corona1$`2019`, color = I("steelblue"), name = "2019")%>%
+  add_trace(x = corona1$Month...11, y = corona1$`2020`, color = I("red"), opacity = 0.5, name = "2020")%>%
+  layout(title = "Figure 1. Total of Deaths, 2015-2019, Sweden", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "date"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+```
+
+\
+
+The second part includes the average of deaths between the years 2015 and 2019. Figure 2 brings forward the average of deaths per day. The methodology of the SCB is as follows. The number of deaths on the first of January for each year is summed and then divided by five. The same for the second of January and so forth. The year 2020 is not included in the calculus. 
+
+\
+
+```{r, echo = FALSE, warning=FALSE, fig.width = 8, comment=FALSE, message=FALSE}
+
+
+library(RColorBrewer)
+
+set.seed(50)
+
+plot_ly(corona1, x = corona1$MonthA, y = corona1$Average, 
+        name = "2015-2019", type = "scatter", mode = "markers", color = I("red"),
+        marker = list(size = corona1$Average/30, opacity = 0.25))%>%
+  layout(title = "Figure 2. Average of Deaths per day, 2015-2019, Sweden", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "month"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+```
+
+\
+\
+\
+
+### Mortality Rate (Gender)
+
+\
+
+The SCB also published data on mortality rate based on gender. The numbers cover the year of 2019 and subsets the data by age, that is to say, 0-64, 65-79, 80-89 and 90+. Figure 1 shows the mortality rate based on female biotypes for 2019.
+
+\
+```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
+
+corona_sweden_gender <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age")
+corona2 <- as.data.frame(corona_sweden_gender)
+
+corona_sweden_gender_2020 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age_2020")
+corona3 <- as.data.frame(corona_sweden_gender_2020, na.rm = TRUE)
+
+library(RColorBrewer)
+
+set.seed(50)
+
+plot_ly(corona2, x = corona2$`2019`, y = corona2$`0-64W`, 
+        name = "0-64 Female", type = "scatter", mode = "markers", color = I("steelblue"), marker = list(size = corona2$`0-64W`/2, opacity = 0.8))%>%
+  add_trace(y = corona2$`65-79W`, color = I("red"), opacity = 0.5, name = "65-79 Female")%>%
+  add_trace(y = corona2$`80-89W`, color = I("lightblue"), name = "80-89 Female")%>%
+  add_trace(y = corona2$`90+W`, color = I("purple"), opacity = 0.4, name = "90+ Female")%>%
+  layout(title = "Figure 1. Total of Deaths, Female, Age, Sweden, 2019", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "date"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+```
+\
+
+Figure 2 shows the mortality rate based on male biotypes for 2019.
+
+\
+```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
+
+
+corona_sweden_gender <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age")
+
+corona2 <- as.data.frame(corona_sweden_gender)
+
+library(RColorBrewer)
+
+set.seed(50)
+
+plot_ly(corona2, x = corona2$`2019`, y = corona2$`0-64M`, 
+        name = "0-64 Male", type = "scatter", mode = "markers", color = I("steelblue"), marker = list(size = corona2$`0-64M`/2, opacity = 0.8))%>%
+  add_trace(y = corona2$`65-79M`, color = I("red"), opacity = 0.5,name = "65-79 Male")%>%
+  add_trace(y = corona2$`80-89M`, color = I("lightblue"), name = "80-89 Male")%>%
+  add_trace(y = corona2$`90+M`, color = I("purple"), opacity = 0.4, name = "90+ Male")%>%
+  layout(title = "Figure 2. Total of Deaths, Male, Age, Sweden, 2019", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "date"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+```
+\
+
+Figure 3 shows the mortality rate based on female biotypes for 2020. The interactive chart is very illustrative when we compare it with the 2019 statistics. We can see also which group based on age was mostly affected by the COVID-19 outbreak.
+
+\
+```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
+
+corona_sweden_gender_2020 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age_2020")
+corona3 <- as.data.frame(corona_sweden_gender_2020, na.rm = TRUE)
+
+library(RColorBrewer)
+
+set.seed(50)
+
+plot_ly(corona3, x = corona3$`2020`, y = corona3$`0-64W`, 
+        name = "0-64 Female", type = "scatter", mode = "markers", color = I("#7f0000"), marker = list(size = corona3$`0-64W`/2, opacity = 0.4))%>%
+  add_trace(y = corona3$`65-79W`, color = I("red"), opacity = 0.85, name = "65-79 Female")%>%
+  add_trace(y = corona3$`80-89W`, color = I("red"), opacity = 0.65, name = "80-89 Female")%>%
+  add_trace(y = corona3$`90+W`, color = I("red"), opacity = 0.45, name = "90+ Female")%>%
+  layout(title = "Figure 3. Total of Deaths, Female, Age, Sweden, 2020", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "date"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+```
+\
+
+Figure 4 shows the mortality rate based on male biotypes for 2020. The interactive chart is very illustrative when we compare it with the 2019 statistics. We can see also which group based on age was mostly affected by the COVID-19 outbreak.
+
+\
+\
+\
+
+```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
+
+corona_sweden_gender_2020 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age_2020")
+corona3 <- as.data.frame(corona_sweden_gender_2020, na.rm = TRUE)
+
+library(RColorBrewer)
+
+set.seed(50)
+
+plot_ly(corona3, x = corona3$`2020`, y = corona3$`0-64M`, 
+        name = "0-64 Male", type = "scatter", mode = "markers", color = I("#7f0000"), marker = list(size = corona3$`0-64M`/2, opacity = 0.4))%>%
+  add_trace(y = corona3$`65-79M`, color = I("red"), opacity = 0.85, name = "65-79 Male")%>%
+  add_trace(y = corona3$`80-89M`, color = I("red"), opacity = 0.45, name = "80-89 Male")%>%
+  add_trace(y = corona3$`90+M`, color = I("red"), opacity = 0.65, name = "90+ Male")%>%
+  layout(title = "Figure 4. Total of Deaths, Male, Age, Sweden, 2020", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "date"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+```
+
+### Tables on Origin
+
+\
+
+```{r, echo = FALSE, message = FALSE}
+
+corona_sweden_origin <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_origin_2020")
+
+
+datatable(corona_sweden_origin[1:4],
+          colnames = c('Origin','Total', 'Women', 'Men'),
+          filter = 'top',
+          extensions = 'Buttons',
+          callback = DT::JS("return table;"),
+          caption = 'Table 1: Total of Deaths, Origin, 2020',
+          options = list(scrollX = T,
+            columnDefs = list(list(width = '10px', targets = "_all")),
+  pageLength = 24,
+  dom = 'Bfrtip', 
+  buttons = c('copy', 'csv', 'excel')))%>%
+    formatRound(2:4, digits=0)%>%
+  formatStyle(columns = c(1:4), fontSize = '80%')
+
+```
+
+\
+
+```{r, echo = FALSE, message = FALSE}
+
+corona_sweden_origin2 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_origin_2015_19")
+
+datatable(corona_sweden_origin2,
+          colnames = c('Origin','Total', 'Women', 'Men'),
+          filter = 'top',
+          extensions = 'Buttons',
+          callback = DT::JS("return table;"),
+          caption = 'Table 2: Total of Deaths, Average, Origin, 2015-2019',
+          options = list(scrollX = T,
+            columnDefs = list(list(width = '10px', targets = "_all")),
+  pageLength = 24,
+  dom = 'Bfrtip', 
+  buttons = c('copy', 'csv', 'excel')))%>%
+    formatRound(2:4, digits=0)%>%
+  formatStyle(columns = c(1:4), fontSize = '80%')
+```
+
+\
+\
+\
+
+### Swedish Regions & Deaths
+
+```{r, echo = FALSE}
+
+### Plotting
+
+leaflet(sweden_test$geometry)%>% 
+  addPolygons(fillColor = "#7f0000", color = "gray",
+              opacity = 0.85,
+              weight = .6, smoothFactor = 0.2,
+              highlightOptions = highlightOptions(color="white", weight=2, bringToFront = TRUE), label= regions)%>%
+  addProviderTiles(providers$CartoDB.Positron)
+
+
+```
+
+\
+\
+\
+
+### Documentation
+
+\
+
+This section will make avaible studies, papers and other texts on health, environment and urban planning related to Sweden and the Nordic region. Please, be patient! The section is under construction.
+
+\
+\
+
+
+
+
