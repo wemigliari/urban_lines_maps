@@ -1,30 +1,46 @@
 ---
 title: "COVID-19 and Ecological Rights"
 author: "Migliari, W. (2020)."
-output:
-  rmarkdown::html_document:
+output: 
+  html_document:
     theme: lumen
-bibliography: testcf.bib
+    toc: true
+    toc_float: true
 ---
-\
-\
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=9, fig.height=4.5, fig.align = "center")
 
+library(curl)
+library(rsconnect)
+library(markdown)
+library(rmarkdown)
+library(htmltools)
+library(mime)
+library(knitr)
+library(rsconnect)
+library(prettydoc)
 library(readxl)
 library(leaflet)
 library(leaflet.extras)
 library(sp)
 library(plotly)
 library(DT)
-
+library(sf)
+library(rgdal)
 library(maps)
+library(tmap)
 library(mapdata)
 library(mapproj)
-
+library(shiny)
 library(dplyr)
 library(readxl)
 library(tidyverse)
+library(transformr)
+library(geojson)
+library(raster) # union function
+library(bookdown)
+library(xfun)
 
 ## Total Deaths per Region
 
@@ -51,25 +67,6 @@ test2 <- set_names(test, nm = test[1, ])
 test2 <- slice(test2, -1)
 
 test3 <-tibble::rownames_to_column(test2, "NAME_1") 
-
-library(curl)
-library(rsconnect)
-library(leaflet)
-library(leaflet.extras)
-library(sp)
-library(plotly)
-library(maps)
-library(mapdata)
-library(mapproj)
-library(leaflet)
-library(sf)
-library(tmap)
-library(transformr)
-library(geojson)
-library(rgdal)
-library(raster) # union function
-library(bookdown)
-data("World")
 
 sweden <- readOGR("/Users/wemigliari/Documents/R/data/SWE_adm1.shp")
 class(sweden)
@@ -101,36 +98,46 @@ regions <- paste(sep = "  ",
 
 \
 
-### Swedish Statistics on Mortality Rate
+```{r, echo = FALSE, include = FALSE, fig.dim= "20%"}
 
-## {.tabset}
-### Introduction
+library(htmltools)
+
+a(href= 'https://orcid.org/0000-0002-1073-1312', icon("orcid", "fa-lg"))
+
+```
+
+```{r, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+```
+
+[<i class="fab fa-orcid fa-2x" style="color: #A6CE39;"></i>](https://orcid.org/0000-0002-1073-1312) [https://orcid.org/0000-0002-1073-1312](https://orcid.org/0000-0002-1073-1312)
+
+\
+
+## Swedish Case Study 
 
 \
 The Swedish Institute of Statistics (Statistik centralbyrån) has published the preliminary data on mortality rate in Sweden. The historical series cover the numbers of deaths during the last five years plus the year of 2020. The Swedish government makes the data public with the intention of informing the domestic society as well as the Nordic region about the consequences brought by the COVID-19 outbreak in the country. To read the complete documentation and download the data, <a href="https://www.scb.se/en/About-us/news-and-press-releases/statistics-sweden-to-publish-preliminary-statistics-on-deaths-in-sweden/" target="_blank"> click here.</a>
 
 \
-This page was built with the purpose of supporting the study of how the Swedish government has dealt with the COVID-19 outbreak. We included two sections with many charts, two tables and a map of Sweden divided into regions. All the material is interactive and we kindly recommend the visitors to explore the buttons and move the cursor over the images. This documentation includes a basic bibliograhy that will be constantly updated. Academic studies, official reports, newspapers and statistics are part of our sources. 
+This page was built with the purpose of supporting the study of how the Swedish government has dealt with the COVID-19 outbreak. We included different sections with many charts, tables and a map of Sweden divided into regions. All the material is interactive and we kindly recommend the visitors to explore the buttons and move the cursor over the images. This documentation includes a basic bibliography that will be constantly updated. Academic studies, official reports, newspapers and statistics are part of our sources. 
 
 \
-It is also important to highlight that the use of the content herein is under the umbrella of the Global Pandemic Network, COVID-19 - Cities and Human Rights. The group is coordinated by Dr. Ronald Car, Associate Professor, University of Macerata, and by the PhD Candidate Maria Antonia Tigre, Pace University, Regional Director, Lat. Am. Global Network for the Study of Human Rights and the Environment. My name is Wellington Migliari, PhD in Law and Political Science, member of the Institut de Recerca TransJus, University of Barcelona, Spain. My main areas of research and publications can be seen <a href="https://orcid.org/0000-0002-1073-1312" target="_blank"> here.</a>
-
-\
-
-```{r pressure, echo=FALSE, out.width = '100%'}
-knitr::include_graphics("global.png")
-```
+It is also important to highlight that the use of the content herein is under the umbrella of the Global Pandemic Network, COVID-19 - Cities and Human Rights. The group is coordinated by Dr. Ronald Car, Associate Professor, University of Macerata, and by the PhD Candidate Maria Antonia Tigre, Pace University, Regional Director, Lat. Am. Global Network for the Study of Human Rights and the Environment. My name is Wellington Migliari, PhD in Law and Political Science, member of the Institut de Recerca TransJus, University of Barcelona, Spain.
 
 \
 \
 \
+\
 
-
-### Mortality Rate
+## Mortality Rate
 
 \
 
 The Statistik centralbyrån (SCB) published the data on mortality rate in different fashions. This section only includes the number of deaths in total numbers and the average for the cross-section 2015-2019. The SCB has only included preliminary results for 2020. 
+
+### Total Number of Deaths
 
 \
 
@@ -161,9 +168,20 @@ plot_ly(corona1, x = corona1$Month...1, y = corona1$`2015`,
 ```
 
 \
+\
+\
+\
+\
+\
+\
+
+### Average of Deaths
+
+\
 
 The second part includes the average of deaths between the years 2015 and 2019. Figure 2 brings forward the average of deaths per day. The methodology of the SCB is as follows. The number of deaths on the first of January for each year is summed and then divided by five. The same for the second of January and so forth. The year 2020 is not included in the calculus. 
 
+\
 \
 
 ```{r, echo = FALSE, warning=FALSE, fig.width = 8, comment=FALSE, message=FALSE}
@@ -188,42 +206,65 @@ plot_ly(corona1, x = corona1$MonthA, y = corona1$Average,
 \
 \
 
-### Mortality Rate (Gender)
-
+### 2019-2020 Mortality Rate (Women)
 \
+The SCB also published data on mortality rate based on gender. The numbers cover the years of 2019-2020 and are divided by age, that is to say, 0-64, 65-79, 80-89 and 90+. The following figures indicate the mortality rate based on female biotypes for 2019 with the chart on the left, and 2020 with the chart on the right.
 
-The SCB also published data on mortality rate based on gender. The numbers cover the year of 2019 and subsets the data by age, that is to say, 0-64, 65-79, 80-89 and 90+. Figure 1 shows the mortality rate based on female biotypes for 2019.
-
-\
 ```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
 
 corona_sweden_gender <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age")
 corona2 <- as.data.frame(corona_sweden_gender)
-
-corona_sweden_gender_2020 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age_2020")
-corona3 <- as.data.frame(corona_sweden_gender_2020, na.rm = TRUE)
-
+  
 library(RColorBrewer)
 
 set.seed(50)
 
-plot_ly(corona2, x = corona2$`2019`, y = corona2$`0-64W`, 
+fig1 <- plot_ly(corona2, x = corona2$`2019`, y = corona2$`0-64W`, 
         name = "0-64 Female", type = "scatter", mode = "markers", color = I("steelblue"), marker = list(size = corona2$`0-64W`/2, opacity = 0.8))%>%
   add_trace(y = corona2$`65-79W`, color = I("red"), opacity = 0.5, name = "65-79 Female")%>%
   add_trace(y = corona2$`80-89W`, color = I("lightblue"), name = "80-89 Female")%>%
   add_trace(y = corona2$`90+W`, color = I("purple"), opacity = 0.4, name = "90+ Female")%>%
-  layout(title = "Figure 1. Total of Deaths, Female, Age, Sweden, 2019", margin = list(b=5, l=5),
+  layout(title = "", margin = list(b=5, l=5),
          xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
                       type = "date"),
          yaxis = list(title = "", titlefont=list(size=7)),
          legend = list(font = list(size = 10)))
 
 ```
+
+```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
+
+corona_sweden_gender_2020 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age_2020")
+corona3 <- as.data.frame(corona_sweden_gender_2020, na.rm = TRUE)
+
+corona3 <- corona3[-c(366),]
+
+library(RColorBrewer)
+
+set.seed(50)
+
+fig2 <- plot_ly(corona3, x = corona3$`2020`, y = corona3$`0-64W`, 
+        name = "0-64 Female", type = "scatter", mode = "markers", color = I("#7f0000"), marker = list(size = corona3$`0-64W`/2, opacity = 0.4))%>%
+  add_trace(y = corona3$`65-79W`, color = I("red"), opacity = 0.85, name = "65-79 Female")%>%
+  add_trace(y = corona3$`80-89W`, color = I("red"), opacity = 0.65, name = "80-89 Female")%>%
+  add_trace(y = corona3$`90+W`, color = I("red"), opacity = 0.45, name = "90+ Female")%>%
+  layout(title = "", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+                      type = "date"),
+         yaxis = list(title = "", titlefont=list(size=7)),
+         legend = list(font = list(size = 10)))
+
+subplot(fig1, fig2)
+```
+\
+\
+\
 \
 
-Figure 2 shows the mortality rate based on male biotypes for 2019.
-
+### 2019-2020 Mortality Rate (Men)
 \
+The following figures show the mortality rate based on male biotypes for 2019-2020. The interactive charts are similar to the previous ones. Figure on the left represents the year 2019 and the one on the right 2020. 
+
 ```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
 
 
@@ -235,51 +276,20 @@ library(RColorBrewer)
 
 set.seed(50)
 
-plot_ly(corona2, x = corona2$`2019`, y = corona2$`0-64M`, 
+fig3 <- plot_ly(corona2, x = corona2$`2019`, y = corona2$`0-64M`, 
         name = "0-64 Male", type = "scatter", mode = "markers", color = I("steelblue"), marker = list(size = corona2$`0-64M`/2, opacity = 0.8))%>%
   add_trace(y = corona2$`65-79M`, color = I("red"), opacity = 0.5,name = "65-79 Male")%>%
   add_trace(y = corona2$`80-89M`, color = I("lightblue"), name = "80-89 Male")%>%
   add_trace(y = corona2$`90+M`, color = I("purple"), opacity = 0.4, name = "90+ Male")%>%
-  layout(title = "Figure 2. Total of Deaths, Male, Age, Sweden, 2019", margin = list(b=5, l=5),
-         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+  layout(title = " 3", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)",
+                      text = "",
+                      tickfont = list(size = 7), titlefont=list(size=7),
                       type = "date"),
          yaxis = list(title = "", titlefont=list(size=7)),
          legend = list(font = list(size = 10)))
 
 ```
-\
-
-Figure 3 shows the mortality rate based on female biotypes for 2020. The interactive chart is very illustrative when we compare it with the 2019 statistics. We can see also which group based on age was mostly affected by the COVID-19 outbreak.
-
-\
-```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
-
-corona_sweden_gender_2020 <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona_statistik_sverige.xlsx", sheet = "total_death_age_2020")
-corona3 <- as.data.frame(corona_sweden_gender_2020, na.rm = TRUE)
-
-library(RColorBrewer)
-
-set.seed(50)
-
-plot_ly(corona3, x = corona3$`2020`, y = corona3$`0-64W`, 
-        name = "0-64 Female", type = "scatter", mode = "markers", color = I("#7f0000"), marker = list(size = corona3$`0-64W`/2, opacity = 0.4))%>%
-  add_trace(y = corona3$`65-79W`, color = I("red"), opacity = 0.85, name = "65-79 Female")%>%
-  add_trace(y = corona3$`80-89W`, color = I("red"), opacity = 0.65, name = "80-89 Female")%>%
-  add_trace(y = corona3$`90+W`, color = I("red"), opacity = 0.45, name = "90+ Female")%>%
-  layout(title = "Figure 3. Total of Deaths, Female, Age, Sweden, 2020", margin = list(b=5, l=5),
-         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
-                      type = "date"),
-         yaxis = list(title = "", titlefont=list(size=7)),
-         legend = list(font = list(size = 10)))
-
-```
-\
-
-Figure 4 shows the mortality rate based on male biotypes for 2020. The interactive chart is very illustrative when we compare it with the 2019 statistics. We can see also which group based on age was mostly affected by the COVID-19 outbreak.
-
-\
-\
-\
 
 ```{r, echo = FALSE, warning=FALSE, fig.width= 9, comment=FALSE, message=FALSE}
 
@@ -290,22 +300,37 @@ library(RColorBrewer)
 
 set.seed(50)
 
-plot_ly(corona3, x = corona3$`2020`, y = corona3$`0-64M`, 
+fig4 <- plot_ly(corona3, x = corona3$`2020`, y = corona3$`0-64M`, 
         name = "0-64 Male", type = "scatter", mode = "markers", color = I("#7f0000"), marker = list(size = corona3$`0-64M`/2, opacity = 0.4))%>%
   add_trace(y = corona3$`65-79M`, color = I("red"), opacity = 0.85, name = "65-79 Male")%>%
   add_trace(y = corona3$`80-89M`, color = I("red"), opacity = 0.45, name = "80-89 Male")%>%
   add_trace(y = corona3$`90+M`, color = I("red"), opacity = 0.65, name = "90+ Male")%>%
-  layout(title = "Figure 4. Total of Deaths, Male, Age, Sweden, 2020", margin = list(b=5, l=5),
-         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)", tickfont = list(size = 7), titlefont=list(size=7),
+  layout(title = "", margin = list(b=5, l=5),
+         xaxis = list(tickangle=0, title = "Sverige centralbyrå (SCB)",
+                      tickfont = list(size = 7), titlefont=list(size=7),
                       type = "date"),
          yaxis = list(title = "", titlefont=list(size=7)),
          legend = list(font = list(size = 10)))
 
+subplot(fig3, fig4)
 ```
 
-### Tables on Origin
-
 \
+\
+\
+\
+\
+
+## Tables 
+
+### 2020 Deaths and Origin 
+
+```{r, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+```
+
+[<i class="fas fa-file-excel fa-lg" style="color:green;"></i>](https://www.scb.se/en/finding-statistics/statistics-by-subject-area/population/population-composition/population-statistics/pong/tables-and-graphs/preliminary-statistics-on-deaths/)
 
 ```{r, echo = FALSE, message = FALSE}
 
@@ -315,20 +340,22 @@ corona_sweden_origin <- read_excel("/Users/wemigliari/Documents/R/tabelas/corona
 datatable(corona_sweden_origin[1:4],
           colnames = c('Origin','Total', 'Women', 'Men'),
           filter = 'top',
-          extensions = 'Buttons',
+          #extensions = 'Buttons',
           callback = DT::JS("return table;"),
           caption = 'Table 1: Total of Deaths, Origin, 2020',
           options = list(scrollX = T,
-            columnDefs = list(list(width = '10px', targets = "_all")),
-  pageLength = 24,
-  dom = 'Bfrtip', 
-  buttons = c('copy', 'csv', 'excel')))%>%
+          columnDefs = list(list(width = '10px', targets = "_all")),
+  pageLength = 24))%>%
     formatRound(2:4, digits=0)%>%
   formatStyle(columns = c(1:4), fontSize = '80%')
 
 ```
 
 \
+
+### 2015-19 Deaths and Origin
+
+[<i class="fas fa-file-excel fa-lg" style="color:green;"></i>](https://www.scb.se/en/finding-statistics/statistics-by-subject-area/population/population-composition/population-statistics/pong/tables-and-graphs/preliminary-statistics-on-deaths/)
 
 ```{r, echo = FALSE, message = FALSE}
 
@@ -337,51 +364,213 @@ corona_sweden_origin2 <- read_excel("/Users/wemigliari/Documents/R/tabelas/coron
 datatable(corona_sweden_origin2,
           colnames = c('Origin','Total', 'Women', 'Men'),
           filter = 'top',
-          extensions = 'Buttons',
+          #extensions = 'Buttons',
           callback = DT::JS("return table;"),
           caption = 'Table 2: Total of Deaths, Average, Origin, 2015-2019',
           options = list(scrollX = T,
             columnDefs = list(list(width = '10px', targets = "_all")),
-  pageLength = 24,
-  dom = 'Bfrtip', 
-  buttons = c('copy', 'csv', 'excel')))%>%
+  pageLength = 24))%>%
     formatRound(2:4, digits=0)%>%
   formatStyle(columns = c(1:4), fontSize = '80%')
 ```
 
 \
+
+## Hospital Beds 
+
+\
+
+The present section shows the data on hospital beds divided into subsections. The first one refers to the number of beds per 1,000. It includes countries which are members of the organization and its key partners. We filtered the Nordic Region to analyse the figures on the Swedish case. The second subsection brings forward the number of beds per 1,000 related to acute care and the numbers have been plotted following the same method of the subsection one. See 
+[OECD, Hospital Beds, Indicator per 1,000](https://data.oecd.org/healtheqt/hospital-beds.htm).
+
+### per 1,000 OECD
+
+\
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+
+hb_ocde <- read_xlsx("/Users/wemigliari/Documents/R/tabelas/hb_ocde.xlsx")
+
+hb_ocde1 <- hb_ocde%>%filter(SUBJECT == "TOT")
+hb_ocde1 <- data.frame(hb_ocde1)
+hb_ocde1[,7] <- sapply(hb_ocde1[,7], as.numeric)
+
+library(plotly)
+library(RColorBrewer)
+
+plot_ly(hb_ocde1, x = ~TIME, y = ~Value, text = ~LOCATION, type = 'scatter', mode = 'markers',
+        marker = list(size = ~Value, opacity = 0.5), 
+        color = ~LOCATION,
+        colors = colorRampPalette(brewer.pal(10,"Spectral"))(42))%>%
+  layout(title = 'Hospital beds. Total per 1,000 inhabitants, 2019, OECD',
+         xaxis = list(title = "", gridcolor = 'rgb(255, 255, 255)'),
+         yaxis = list(title = "Hospital Beds", gridcolor = 'rgb(255, 255, 255)'),
+         showlegend = TRUE)
+```
+
+\
+\
+\
+\
+\
 \
 \
 
-### Swedish Regions & Deaths
+### per 1,000 Nordic Region
 
+\
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+
+nordics <- c("SWE", "DNK", "NOR", "FIN")
+
+hb_ocde2 <-  hb_ocde1%>%filter(LOCATION %in% nordics)
+hb_ocde2 <- data.frame(hb_ocde2) # Fisrt, convert the data table into data frame
+
+hb_ocde2[,7] <- sapply(hb_ocde2[,7], as.numeric)
+
+
+plot_ly(hb_ocde2, x = ~TIME, y = ~Value, text = ~LOCATION, type = 'scatter', mode = 'lines',
+        marker = list(size = ~Value, opacity = 0.5), 
+        color = ~LOCATION,
+        colors = colorRampPalette(brewer.pal(4,"Paired"))(4))%>%
+  layout(title = 'Hospital beds. Total per 1,000 inhabitants, 2019, OECD',
+         xaxis = list(title = "", gridcolor = 'rgb(255, 255, 255)'),
+         yaxis = list(title = "Hospital Beds", gridcolor = 'rgb(255, 255, 255)'),
+         showlegend = TRUE)
+
+```
+
+\
+\
+\
+\
+\
+\
+\
+
+### per 1,000 OECD, Acute Care
+
+\
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+
+ac_ocde <- read_xlsx("/Users/wemigliari/Documents/R/tabelas/hb_ocde.xlsx")
+
+ac_ocde1 <- ac_ocde%>%filter(SUBJECT == "ACUTE")
+
+ac_ocde1 <- data.frame(ac_ocde1) # Fisrt, convert the data table into data frame
+
+ac_ocde1[,7] <- sapply(ac_ocde1[,7], as.numeric)
+
+library(plotly)
+library(RColorBrewer)
+
+plot_ly(ac_ocde1, x = ~TIME, y = ~Value, text = ~LOCATION, type = 'scatter', mode = 'markers',
+        marker = list(size = ~Value, opacity = 0.5), 
+        color = ~LOCATION,
+        colors = colorRampPalette(brewer.pal(10,"Reds"))(42))%>%
+  layout(title = 'Hospital beds. Total per 1,000 inhabitants, 2019, OCDE',
+         xaxis = list(title = "", gridcolor = 'rgb(255, 255, 255)'),
+         yaxis = list(title = "Hospital Beds", gridcolor = 'rgb(255, 255, 255)'),
+         showlegend = TRUE)
+```
+
+\
+\
+\
+\
+\
+\
+\
+
+### per 1,000 Nordic Region, Acute Care
+
+\
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+
+nordics <- c("SWE", "DNK", "NOR", "FIN")
+
+ac_ocde2 <-  ac_ocde1%>%filter(LOCATION %in% nordics)
+ac_ocde2 <- data.frame(ac_ocde2) # Fisrt, convert the data table into data frame
+
+
+plot_ly(ac_ocde2, x = ~TIME, y = ~Value, text = ~LOCATION, type = 'scatter', mode = 'lines',
+        marker = list(size = ~Value, opacity = 0.5), 
+        color = ~LOCATION,
+        colors = colorRampPalette(brewer.pal(4,"Dark2"))(4))%>%
+  layout(title = 'Hospital beds, Acute. Total per 1,000 inhabitants, 2019, OCDE',
+         xaxis = list(title = ""),
+         size = 0.7,
+         yaxis = list(title = "Hospital Beds"),
+         size = 0.7,
+         showlegend = TRUE, legend = list(font = list(size = 10)))
+```
+
+\
+\
+\
+\
+\
+\
+\
+
+## Swedish Regions & Deaths
+
+\
 ```{r, echo = FALSE}
 
 ### Plotting
 
+library(RColorBrewer)
+
 leaflet(sweden_test$geometry)%>% 
-  addPolygons(fillColor = "#7f0000", color = "gray",
-              opacity = 0.85,
+  addPolygons(fillColor = "red", color = "gray",
+              opacity = 1,
               weight = .6, smoothFactor = 0.2,
               highlightOptions = highlightOptions(color="white", weight=2, bringToFront = TRUE), label= regions)%>%
   addProviderTiles(providers$CartoDB.Positron)
 
 
 ```
+\
+We add more charts herein with the intention of complementing the interactive map above. The idea is to produce metadata using simple lines and figures to facilitate our comprehension of the COVID-19 dynamics in Sweden. See 
+```{r, echo = FALSE}
 
+xfun::embed_file('/Users/wemigliari/Library/Mobile Documents/com~apple~CloudDocs/Pós-Doutorado & Doutorado/Pós-Doc/Applications/7. July/Potsdam/Documentation/globalpandemic.pdf', text = 'Metadata on the COVID-19, Sweden, SCB')
+
+```
+.
 \
 \
 \
-
-### Documentation
-
 \
-
-This section will make avaible studies, papers and other texts on health, environment and urban planning related to Sweden and the Nordic region. Please, be patient! The section is under construction.
-
+\
+\
 \
 \
 
+## Documentation
+
+\
+```{r, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+```
+
+<i class="fas fa-file-alt fa-2x" style="color: steelblue;"></i> <a href="http://www.bbc.com/earth/story/20170504-there-are-diseases-hidden-in-ice-and-they-are-waking-up" target="_blank">There are diseases hidden in ice, and they are waking up</a> 
+
+<i class="fas fa-file-alt fa-2x" style="color: steelblue;"></i> <a href="https://journals.sagepub.com/doi/pdf/10.1177/1403494814546925" target="_blank">Governance of public health: Norway in a Nordic context</a> 
+
+<i class="fas fa-file-alt fa-2x" style="color: steelblue;"></i> <a href="https://journals.sagepub.com/doi/pdf/10.1177/1403494818765705" target="_blank">Time to dismiss the idea of a structural fix within government? An
+analysis of intersectoral action for health in Danish municipalities</a>
+
+<i class="fas fa-file-alt fa-2x" style="color: steelblue;"></i> <a href="https://journals.sagepub.com/doi/pdf/10.1177/1403494812472296" target="_blank">Time to dismiss the idea of a structural fix within government? Health in all policies as a priority in Finnish health policy:
+A case study on national health policy development</a>
+
+<i class="fas fa-file-alt fa-2x" style="color: steelblue;"></i> <a href="https://journals.sagepub.com/doi/pdf/10.1177/1403494814546925" target="_blank">The next step towards more equity in health in Sweden: how can we close the gap in a generation?</a>
 
 
-
+\
+\
